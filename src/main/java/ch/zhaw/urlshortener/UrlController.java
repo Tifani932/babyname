@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ch.zhaw.urlshortener.model.ShortUrl;
 import ch.zhaw.urlshortener.model.ShortUrlDTO;
 
+
+
 @RestController
 public class UrlController {
 
@@ -21,8 +23,12 @@ public class UrlController {
     @PostMapping("/shorten")
     public ResponseEntity<String> shortenUrl(@RequestBody ShortUrlDTO shortUrlDTO) {
         String shortUrl = UUID.randomUUID().toString().substring(0,8);
-        urlMap.put(shortUrl, new ShortUrl(shortUrl, shortUrlDTO.getLongUrl()));
-        return ResponseEntity.ok(shortUrl);
+        if (shortUrlDTO.getLongUrl().startsWith("http://")) {
+            urlMap.put(shortUrl, new ShortUrl(shortUrl, shortUrlDTO.getLongUrl(), System.currentTimeMillis()));
+            return ResponseEntity.ok(shortUrl);
+        } else {
+            return ResponseEntity.badRequest().body("URL must start with http://");
+        }
     }
 
     @GetMapping("/urls")
